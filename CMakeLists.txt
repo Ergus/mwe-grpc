@@ -17,12 +17,13 @@ cmake_minimum_required(VERSION 3.5)
 
 project(ExtraeWin LANGUAGES CXX)
 
-find_package(gRPC CONFIG REQUIRED)
-find_package(Protobuf REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(gRPC REQUIRED)
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# Generate C++ lib
 add_library(ProtoTest prototest.proto)
 target_link_libraries(ProtoTest PUBLIC gRPC::grpc++)
 protobuf_generate(TARGET ProtoTest)
@@ -34,9 +35,12 @@ protobuf_generate(
     PLUGIN_OPTIONS generate_mock_code=true
     GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc)
 
+# Build C++ server
 add_executable(protoserver protoserver.cpp)
 target_link_libraries(protoserver ProtoTest)
 
+# Build C++ client
 add_executable(protoclient protoclient.cpp)
 target_link_libraries(protoclient ProtoTest)
-set_property(TARGET protoclient PROPERTY CXX_STANDARD 20)
+set_property(TARGET protoclient PROPERTY CXX_STANDARD 20) # Needed for atomic wait
+
