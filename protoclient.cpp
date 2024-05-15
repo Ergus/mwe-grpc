@@ -29,7 +29,7 @@ public:
       : _stub(testService::NewStub(channel))
 	{}
 
-	int testService(int val1, int val2)
+	int testService_async(int val1, int val2)
 	{
 		// Data we are sending to the server.
 		testRequest request;
@@ -65,6 +65,30 @@ public:
 		return response.result();
 	}
 
+	int testService_sync(int val1, int val2)
+	{
+		// Data we are sending to the server.
+		testRequest request;
+		request.set_value1(val1);
+		request.set_value2(val2);
+
+		// Container for the data we expect from the server.
+		testResponse response;
+
+		// Context for the client. It could be used to convey extra information
+		// to the server and/or tweak certain RPC behaviors.
+		grpc::ClientContext context;
+
+		grpc::Status status = _stub->testFunction(&context, request, &response);
+
+		if (!status.ok()) {
+			std::cout << status.error_code() << ": " << status.error_message() << std::endl;
+			throw std::runtime_error("Error calling grpc service.");
+		}
+
+		return response.result();
+	}
+
 private:
 	std::unique_ptr<testService::Stub> _stub;
 };
@@ -78,8 +102,11 @@ int main(int argc, char** argv) {
 		grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials())
 	);
 
-	int reply = client.testService(val1, val2);
-	std::cout << "Sum received: " << reply << std::endl;
+	int reply1 = client.testService_sync(val1, val2);
+	std::cout << "Sum sync received: " << reply1 << std::endl;
+
+	int reply2 = client.testService_async(val1, val2);
+	std::cout << "Sum async received: " << reply2 << std::endl;
 
   return 0;
 }
