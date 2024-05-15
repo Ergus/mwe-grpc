@@ -15,7 +15,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(ExtraeWin LANGUAGES CXX)
+project(MWEGRPC LANGUAGES CXX)
 
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC REQUIRED)
